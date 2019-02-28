@@ -58,7 +58,7 @@ class Tracker:
         @param image The image to segment.
         """
         pred = Predictor.Predictor()
-        label = self.predictor.predict(image, 'DeepLabV3_plus', './src/Segmentation/trained_net/latest_model_DeepLabV3_plus_Surgery.ckpt')
+        label = pred.predict(image, 'DeepLabV3_plus', './src/Segmentation/trained_net/latest_model_DeepLabV3_plus_Surgery.ckpt')
         return label
 
 
