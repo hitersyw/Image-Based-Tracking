@@ -59,13 +59,13 @@ def AtrousSpatialPyramidPoolingModule(inputs, depth=256):
 
 
 
-def build_deeplabv3_plus(inputs, num_classes, preset_model='DeepLabV3+', frontend="ResNet101", weight_decay=1e-5, is_training=True, pretrained_dir="models"):
+def build_deeplabv3_plus(inputs, num_classes, preset_model='DeepLabV3+', frontend="ResNet101", weight_decay=1e-5, is_training=True, pretrained_dir="src/Segmentation/models"):
     """
-    Builds the DeepLabV3 model. 
+    Builds the DeepLabV3 model.
 
     Arguments:
-      inputs: The input tensor= 
-      preset_model: Which model you want to use. Select which ResNet model to use for feature extraction 
+      inputs: The input tensor=
+      preset_model: Which model you want to use. Select which ResNet model to use for feature extraction
       num_classes: Number of classes
 
     Returns:
@@ -91,7 +91,7 @@ def build_deeplabv3_plus(inputs, num_classes, preset_model='DeepLabV3+', fronten
     net = slim.conv2d(net, 256, [3, 3], activation_fn=tf.nn.relu, normalizer_fn=None)
 
     net = Upsampling(net, label_size)
-    
+
     net = slim.conv2d(net, num_classes, [1, 1], activation_fn=None, scope='logits')
 
     return net, init_fn

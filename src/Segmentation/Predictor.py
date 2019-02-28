@@ -2,6 +2,7 @@ import os,time,cv2, sys, math
 import tensorflow as tf
 import argparse
 import numpy as np
+import datetime
 
 from .utils import utils, helpers
 from .builders import model_builder
@@ -53,8 +54,10 @@ class Predictor:
         resized_image = cv2.resize(loaded_image, (width, height))
         input_image = np.expand_dims(np.float32(resized_image[:height, :width]),axis=0)/255.0
 
+        time1 = datetime.datetime.now()
         output_image = sess.run(network,feed_dict={net_input:input_image})
-
+        time2 = datetime.datetime.now()
+        print("time for query: ", time2 - time1)
         output_image = np.array(output_image[0,:,:,:])
         output_image = helpers.reverse_one_hot(output_image)
 

@@ -3,10 +3,10 @@ from tensorflow.contrib import slim
 from frontends import resnet_v2
 from frontends import mobilenet_v2
 from frontends import inception_v4
-import os 
+import os
 
 
-def build_frontend(inputs, frontend, is_training=True, pretrained_dir="models"):
+def build_frontend(inputs, frontend, is_training=True, pretrained_dir="src/Segmentation/models"):
     if frontend == 'ResNet50':
         with slim.arg_scope(resnet_v2.resnet_arg_scope()):
             logits, end_points = resnet_v2.resnet_v2_50(inputs, is_training=is_training, scope='resnet_v2_50')
@@ -35,4 +35,4 @@ def build_frontend(inputs, frontend, is_training=True, pretrained_dir="models"):
     else:
         raise ValueError("Unsupported fronetnd model '%s'. This function only supports ResNet50, ResNet101, ResNet152, and MobileNetV2" % (frontend))
 
-    return logits, end_points, frontend_scope, init_fn 
+    return logits, end_points, frontend_scope, init_fn
