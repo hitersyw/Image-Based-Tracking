@@ -1,0 +1,9 @@
+numpy
+OpenCV
+tensorflow
+matplotlib
+
+
+for Demo:
+matplotlib
+datetime
