@@ -41,7 +41,7 @@ def build_model(model_name, net_input, num_classes, crop_width, crop_height, fro
 
 	if "ResNet50" == frontend and not os.path.isfile("src/Segmentation/models/resnet_v2_50.ckpt"):
 	    download_checkpoints("ResNet50")
-	if "ResNet101" == frontend and not os.path.isfile("src/Segmentation/models/resnet_v2_101.ckpt"):
+	if "ResNet101" == frontend and not os.path.isfile("./src/Segmentation/models/resnet_v2_101.ckpt"):
 	    download_checkpoints("ResNet101")
 	if "ResNet152" == frontend and not os.path.isfile("src/Segmentation/models/resnet_v2_152.ckpt"):
 	    download_checkpoints("ResNet152")

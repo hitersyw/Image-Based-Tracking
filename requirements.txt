@@ -1,9 +1,9 @@
 numpy
 OpenCV
 tensorflow
+(if GPU available: tensorflow-gpu)
 matplotlib
-
-
-for Demo:
+scikit-image
+scikit-learn
 matplotlib
 datetime

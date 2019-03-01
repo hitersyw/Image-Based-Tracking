@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-class ORB_Plotter:
+class Plotter:
     """!
     Helper class to prepare plots of keypoints and matches.
     """
@@ -61,7 +61,6 @@ class ORB_Plotter:
 
         if image.shape[2] == 1:
             image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
-
         # does not work currently since OpenCV 4.0.1 seems to have an issue with it, should be fixed with ne next release however
         # colorImage = cv2.drawKeypoints(colorImage, keypoints, colorImage)
         for kp in keypoints:

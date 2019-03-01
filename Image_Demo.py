@@ -14,7 +14,7 @@ from src import Plotter
 start = datetime.datetime.now()
 
 # load the sample image
-reference_image = cv2.imread('./data/Mallorca.png')
+reference_image = cv2.imread('./data/image15.png')
 height, width, _ = reference_image.shape
 print(reference_image.shape)
 
@@ -23,16 +23,14 @@ M = np.float32([[1, 0, 40], [0, 1, 50]])
 comparison_image = cv2.warpAffine(reference_image, M, (width, height))
 
 # instantiate the Tracker with the two images
-tracker = Tracker.Tracker(reference_image, comparison_image)
+tracker = Tracker.Tracker()
 # instantiate the Plotter
-plotter = Plotter.ORB_Plotter()
+plotter = Plotter.Plotter()
 
-# preprocess the images, we don't need the return values here so we just ignore it
-tracker.preprocess()
 # extract the keypoints and match them according to their descriptors
-keypoints_ref, keypoints_comp, matches = tracker.extract_and_match()
+keypoints_ref, keypoints_comp, matches = tracker.extract_and_match(reference_image, comparison_image, segmentation=True)
 # compute the affine transformation model, we ignore the mask here, see the documentation for more information
-model, _ = tracker.compute_affine_transform()
+model, _ = tracker.compute_affine_transform(keypoints_ref, keypoints_comp, matches)
 
 end = datetime.datetime.now()
 print("The transformation was computed as ")

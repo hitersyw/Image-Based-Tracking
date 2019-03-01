@@ -3,7 +3,7 @@ This is a small demo using the Tracker and Plotter for video stream input.
 We load one frame at a time.
 For demonstration purpose we do not use the combined tracking function Tracker.track() but rather all steps individual.
 """
-
+#TODO: Kommentare zu einzelnen Zeilen 
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
@@ -35,12 +35,11 @@ while vc.isOpened():
 
     assert frameReference.shape == frameNew.shape
 
-    tracker = Tracker.Tracker(frameReference, frameNew)
-    plotter = Plotter.ORB_Plotter()
+    tracker = Tracker.Tracker()
+    plotter = Plotter.Plotter()
 
-    tracker.preprocess()
-    keypoints1, keypoints2, matches = tracker.extract_and_match()
-    model, mask = tracker.compute_affine_transform()
+    keypoints1, keypoints2, matches = tracker.extract_and_match(frameReference, frameNew, segmentation=False)
+    model, mask = tracker.compute_affine_transform(keypoints1, keypoints2, matches)
 
     red = (0, 0, 255)
     blue = (255, 0, 0)

@@ -6,7 +6,7 @@ from frontends import inception_v4
 import os
 
 
-def build_frontend(inputs, frontend, is_training=True, pretrained_dir="src/Segmentation/models"):
+def build_frontend(inputs, frontend, is_training=True, pretrained_dir="./src/Segmentation/models"):
     if frontend == 'ResNet50':
         with slim.arg_scope(resnet_v2.resnet_arg_scope()):
             logits, end_points = resnet_v2.resnet_v2_50(inputs, is_training=is_training, scope='resnet_v2_50')
