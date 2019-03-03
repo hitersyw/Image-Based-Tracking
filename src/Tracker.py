@@ -60,7 +60,11 @@ class Tracker:
         edges = cv2.Canny(label, 10, 100)
         edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
 
-        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        # depending on your OpenCV version this function call differs
+        if cv2.__version__.startswith('4'):
+            contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        else:
+            _, contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         bounding_boxes = []
         for i in range(len(contours)):
             box = cv2.minAreaRect(contours[i])

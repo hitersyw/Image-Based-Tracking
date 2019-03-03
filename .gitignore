@@ -1,6 +1,7 @@
 *.avi
 *.png
 *.jpg
+*.ckpt
 
 !/data/*
 /docs/*
