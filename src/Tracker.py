@@ -20,15 +20,9 @@ class Tracker:
         @return The preprocessed image.
         """
         # convert images to greyscale
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-        # erode with (5, 5) kernel images to remove lighting artefacts
-        kernel = (5, 5)
-        image = cv2.erode(image, kernel)
-
-        # histogramm equalization
-        image = cv2.equalizeHist(image)
-        return image
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        glare = cv2.inRange(image, (0, 0, 180), (255, 255, 255))
+        return cv2.bitwise_not(glare)
 
     def semantic_segmentation(self, image):
         """!
@@ -92,14 +86,11 @@ class Tracker:
         @return matches A list of the found matches of OpenCV type <a href="https://docs.opencv.org/4.0.1/d4/de0/classcv_1_1DMatch.html">DMatch</a>
         """
         orb = cv2.ORB_create()
-        mask_reference = None
-        mask_comparison = None
+        mask_reference = self.preprocess(reference_image)
+        mask_comparison = self.preprocess(reference_image)
         if segmentation:
-            mask_reference = self.__extract_mask(reference_image)
-            mask_comparison = self.__extract_mask(comparison_image)
-
-        reference_image = self.preprocess(reference_image)
-        comparison_image = self.preprocess(comparison_image)
+            mask_reference = mask_reference & self.__extract_mask(reference_image)
+            mask_comparison = mask_comparison & self.__extract_mask(comparison_image)
 
         keypoints1, descriptors1 = orb.detectAndCompute(reference_image, mask_reference)
         keypoints2, descriptors2 = orb.detectAndCompute(comparison_image, mask_comparison)
