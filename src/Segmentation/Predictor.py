@@ -18,7 +18,7 @@ class Predictor:
         """!
         Initializes the neural net by loading the pretrained model.
 
-        @param The name of the model to use. Make sure your pretrained model was trained using the same model.
+        @param model The name of the model to use. Make sure your pretrained model was trained using the same model.
         @param checkpoint_path The path to the pretrained model file.
         """
         label_info_path = "./src/Segmentation/utils/class_dict.csv"
