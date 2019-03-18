@@ -23,6 +23,9 @@ fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(20, 5))
 plt.axis('off')"""
 
 i  = 0
+segmentation = True
+orb = Tracker.Tracker(segmentation)
+plotter = Plotter.Plotter()
 start = datetime.datetime.now()
 while vc.isOpened():
     time1 = datetime.datetime.now()
@@ -36,23 +39,9 @@ while vc.isOpened():
         print('done, writing video...')
         break
 
-    """orb = Tracker(frameReference, frameNew)
-    #preRef, preNew = orb.preprocess()
-    orb.preprocess()
-    k1, k2, m = orb.extract_and_match()"""
-
-    """plotter = Plotter.ORB_Plotter()
-
-    color1 = (0, 0, 255)
-    color = (255, 0, 0)
-    plot = plotter.plot_segmentation_results(frameNew, frameReference, color, color1)
-    cv2.imwrite('plot.png', plot)"""
-
-    orb = Tracker.Tracker(frameNew, frameNew)
-    plotter = Plotter.ORB_Plotter()
-    label = orb.semantic_segmentation(frameNew)
-    k1, _, _ = orb.extract_and_match()
-    seg = plotter.plot_segmentation_results(frameNew, label, (0, 0, 255), (0, 0, 255))
+    label = orb.semantic_segmentation(frameReference)
+    k1, _, _ = orb.extract_and_match(frameReference, frameNew)
+    seg = plotter.plot_segmentation_results(frameReference, label, (0, 0, 255), (0, 0, 255))
     kp = plotter.plot_keypoints(seg, k1, 4, (255, 0, 0))
     vw.write(kp)
 

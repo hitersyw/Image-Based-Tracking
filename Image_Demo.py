@@ -22,13 +22,14 @@ print(reference_image.shape)
 M = np.float32([[1, 0, 40], [0, 1, 50]])
 comparison_image = cv2.warpAffine(reference_image, M, (width, height))
 
+segmentation = True
 # instantiate the Tracker with the two images
-tracker = Tracker.Tracker()
+tracker = Tracker.Tracker(segmentation)
 # instantiate the Plotter
 plotter = Plotter.Plotter()
 
 # extract the keypoints and match them according to their descriptors
-keypoints_ref, keypoints_comp, matches = tracker.extract_and_match(reference_image, comparison_image, segmentation=True)
+keypoints_ref, keypoints_comp, matches = tracker.extract_and_match(reference_image, comparison_image)
 # compute the affine transformation model, we ignore the mask here, see the documentation for more information
 model, _ = tracker.compute_affine_transform(keypoints_ref, keypoints_comp, matches)
 
