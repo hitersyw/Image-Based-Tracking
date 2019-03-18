@@ -15,6 +15,12 @@ class Predictor:
     """
 
     def __init__(self, model, checkpoint_path):
+        """!
+        Initializes the neural net by loading the pretrained model.
+
+        @param The name of the model to use. Make sure your pretrained model was trained using the same model.
+        @param checkpoint_path The path to the pretrained model file.
+        """
         label_info_path = "./src/Segmentation/utils/class_dict.csv"
         class_names_list, self.label_values = helpers.get_label_info(label_info_path)
 
@@ -41,16 +47,14 @@ class Predictor:
 
     def predict(self, image):
         """!
-        Queries the net with the given image.
+        Queries the net using the given image as input.
 
         @param image The image to query
-        @param model The model to use
-        @param checkpoint_path The path to the pretrained network to use.
 
         @return An image with the predicted labels according to the given image.
         """
         height, width, _ = image.shape
-        
+
         loaded_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         resized_image = cv2.resize(loaded_image, (width, height))
         input_image = np.expand_dims(np.float32(resized_image[:height, :width]),axis=0)/255.0

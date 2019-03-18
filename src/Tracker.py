@@ -13,6 +13,15 @@ class Tracker:
     """
 
     def __init__(self, segmentation):
+        """!
+        Initializes the Tracker. Segmentation option determines whether to load the semantic segmentation model.
+        Currently only segmentation for surgical instruments is supported.
+        If you have a different model trained you have to change the parameters in the Predictor.predict() call.
+        We use Googles DeepLabV3+ as model.
+        If you want to change the net see @link Predictor @endlink for further information.
+
+        @param segmentation True, if the tracker should consider labels from semantic segmentations during the tracking process.
+        """
         self.pred = None
         if segmentation:
             self.pred = Predictor.Predictor('DeepLabV3_plus', './src/Segmentation/trained_net/latest_model_DeepLabV3_plus_Surgery.ckpt')
@@ -36,11 +45,12 @@ class Tracker:
         Semantically segments the given image.
         Currently only segmentation for surgical instruments is supported.
         If you have a different model trained you have to change the parameters in the Predictor.predict() call.
-        We use googles DeepLabV3+ as model.
+        We use Googles DeepLabV3+ as model.
         If you want to change the net see @link Predictor @endlink for further information.
 
         @param image The image to segment. Must be a color image.
         """
+        # ensure the neural net is initialized
         if not self.pred:
             self.pred = Predictor.Predictor('DeepLabV3_plus', './src/Segmentation/trained_net/latest_model_DeepLabV3_plus_Surgery.ckpt')
         label = self.pred.predict(image)
