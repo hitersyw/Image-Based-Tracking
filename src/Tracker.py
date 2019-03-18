@@ -164,4 +164,4 @@ class Tracker:
         @return mask Binary mask where 1 indicates an inlier to the found model.
         """
         k1, k2, m = self.extract_and_match(reference_image, comparison_image)
-        return self.calculate_affine_transform(k1, k2, m)
+        return self.compute_affine_transform(k1, k2, m)
