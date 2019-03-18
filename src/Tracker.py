@@ -85,7 +85,6 @@ class Tracker:
             vertices = np.int0(vertices)
             mask = cv2.fillConvexPoly(mask, vertices, 255)
 
-        cv2.imwrite('l.png', cv2.bitwise_not(mask))
         return cv2.bitwise_not(mask)
 
 
@@ -109,8 +108,6 @@ class Tracker:
         if self.__segmentation:
             mask_reference = mask_reference & self.__extract_mask(reference_image)
             mask_comparison = mask_comparison & self.__extract_mask(comparison_image)
-
-        cv2.imwrite('m.png', mask_comparison)
 
         keypoints1, descriptors1 = orb.detectAndCompute(reference_image, mask_reference)
         keypoints2, descriptors2 = orb.detectAndCompute(comparison_image, mask_comparison)
