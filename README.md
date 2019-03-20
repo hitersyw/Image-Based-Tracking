@@ -1,4 +1,4 @@
-# Image Based Tracker
+# Image Based Tracking
 
 This code can be used to track scenes by providing 2D RGB images. It uses the ORB feature detector which detects and computes keypoints and their descriptors in the input images. These descriptors of two consecutive are then matched and a transformation model is calculated.
 The code in this repository is specialised to track patients movement during surgery. In order to provide robust and accurate tracking we assume that the scene to track is a rigid body.
