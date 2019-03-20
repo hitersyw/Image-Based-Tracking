@@ -3,7 +3,9 @@
 *.jpg
 *.ckpt
 
-!/data/*
+!/data/SurgeryExample.png
+!/data/Surgery.avi
+
 /docs/*
 /src/Segmentation/trained_net/*
 

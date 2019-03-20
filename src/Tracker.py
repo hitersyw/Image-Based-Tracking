@@ -24,6 +24,9 @@ class Tracker:
         """
         self.__pred = None
         if segmentation:
+            # change this if you want to use a different neural net
+            # first argument is the name of the used model (see the Segmantation Suite repo for available models)
+            # provide the path to the trained net in the second argument
             self.__pred = Predictor.Predictor('DeepLabV3_plus', './src/Segmentation/trained_net/latest_model_DeepLabV3_plus_Surgery.ckpt')
         self.__segmentation = segmentation
 

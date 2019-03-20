@@ -14,7 +14,7 @@ from src import Plotter
 start = datetime.datetime.now()
 
 # load the sample image
-reference_image = cv2.imread('./data/image15.png')
+reference_image = cv2.imread('./data/SurgeryExample.png')
 height, width, _ = reference_image.shape
 print(reference_image.shape)
 
