@@ -1,9 +1,0 @@
-numpy
-OpenCV
-tensorflow
-(if GPU available: tensorflow-gpu)
-matplotlib
-scikit-image
-scikit-learn
-matplotlib
-datetime
