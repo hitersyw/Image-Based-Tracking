@@ -3,6 +3,8 @@ import numpy as np
 import warnings
 
 from .Segmentation import Predictor
+import sys
+np.set_printoptions(threshold=sys.maxsize)
 
 
 class Tracker:
@@ -33,15 +35,25 @@ class Tracker:
 
     def preprocess(self, image):
         """!
-        Preprocesses the given image and returns it.
+        Preprocesses the given image and returns a mask with lighting dependent artifacts marked. If the class is called with segmentation=True
+        all found surgical instruments are marked as well. In this case the input image needs to be a color image.
 
         @param image The image to preprocess.
-        @return The preprocessed image.
+        @return The black and white mask for the given image.
         """
-        # convert images to greyscale
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        glare = cv2.inRange(image, (0, 0, 180), (255, 255, 255))
-        return cv2.bitwise_not(glare)
+        # detect lighting dependent artifacts
+        image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        mask = cv2.inRange(image_hsv, (0, 0, 180), (255, 255, 255))
+
+        if self.__segmentation:
+            label = self.semantic_segmentation(image)
+            label = cv2.cvtColor(label, cv2.COLOR_BGR2GRAY)
+            label[np.nonzero(label)] = 255
+            mask = mask | label
+
+        kernel = np.ones((5, 5))
+        mask = cv2.dilate(mask, kernel)
+        return cv2.bitwise_not(mask)
 
     def semantic_segmentation(self, image):
         """!
@@ -60,37 +72,6 @@ class Tracker:
         return label
 
 
-    def __extract_mask(self, image):
-        """!
-        Generates the mask for the feature detector. The mask determines what area(s) to exclude from the feature search.
-        The mask is based on the semantic segmentation of the image which labels surgical instruments.
-        For other non rigid tracking scenes out of surgeries, this method can be adjusted or replaced.
-
-        @param image The image the mask should be extracted for.
-        """
-        label = self.semantic_segmentation(image)
-        mask = np.zeros(image.shape[:2], dtype=np.uint8)
-        kernel = np.ones((7,7),np.uint8)
-
-        edges = cv2.Canny(label, 10, 100)
-        edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
-
-        # depending on your OpenCV version this function call differs
-        if cv2.__version__.startswith('4'):
-            contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-        else:
-            _, contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-        bounding_boxes = []
-        for i in range(len(contours)):
-            box = cv2.minAreaRect(contours[i])
-            bounding_boxes.append(box)
-            vertices = cv2.boxPoints(box)
-            vertices = np.int0(vertices)
-            mask = cv2.fillConvexPoly(mask, vertices, 255)
-
-        return cv2.bitwise_not(mask)
-
-
     def extract_and_match(self, reference_image, comparison_image):
         """!
         Extracts keypoints and their descriptors in the given images and tries to find matches between these keypoints.
@@ -107,10 +88,6 @@ class Tracker:
         orb = cv2.ORB_create()
         mask_reference = self.preprocess(reference_image)
         mask_comparison = self.preprocess(comparison_image)
-
-        if self.__segmentation:
-            mask_reference = mask_reference & self.__extract_mask(reference_image)
-            mask_comparison = mask_comparison & self.__extract_mask(comparison_image)
 
         keypoints1, descriptors1 = orb.detectAndCompute(reference_image, mask_reference)
         keypoints2, descriptors2 = orb.detectAndCompute(comparison_image, mask_comparison)
@@ -134,15 +111,24 @@ class Tracker:
 
     def compute_affine_transform(self, keypoints_reference_image, keypoints_comparison_image, matches):
         """!
-        Compute the affine transform between the first image and the second image.
+        Compute the affine transform between the first image and the second image given the keypoints and the found matches.
 
-        @param keypoints_reference_image The keypoints found in the first image. Must be of OpenCV type <a href="https://docs.opencv.org/4.0.1/d2/d29/classcv_1_1KeyPoint.html">KeyPoint</a>.
-        @param keypoints_comparison_image The keypoints found in the second image. Must be of OpenCV type <a href="https://docs.opencv.org/4.0.1/d2/d29/classcv_1_1KeyPoint.html">KeyPoint</a>.
-        @param matches The found matches between the two keypoint sets. Must be of OpenCV type <a href="https://docs.opencv.org/4.0.1/d4/de0/classcv_1_1DMatch.html">DMatch</a>.
+        @param keypoints_reference_image The keypoints found in the first image. Must be of OpenCV type <a href="https://docs.opencv.org/4.0.1/d2/d29/classcv_1_1KeyPoint.html">KeyPoint</a>. May not be empty.
+        @param keypoints_comparison_image The keypoints found in the second image. Must be of OpenCV type <a href="https://docs.opencv.org/4.0.1/d2/d29/classcv_1_1KeyPoint.html">KeyPoint</a>. May not be empty.
+        @param matches The found matches between the two keypoint sets. Must be of OpenCV type <a href="https://docs.opencv.org/4.0.1/d4/de0/classcv_1_1DMatch.html">DMatch</a>. May not be empty.
 
         @return model The computed affine transformation from the first image to the second image.
         @return mask Binary mask where 1 indicates an inlier to the found model.
         """
+        if not keypoints_reference_image:
+            raise ValueError('keypoints_reference_image may not be empyt.')
+
+        if not keypoints_comparison_image:
+            raise ValueError('keypoints_comparison_image may not be empyt.')
+
+        if not matches:
+            raise ValueError('matches may not be empty.')
+
         matches_reference = np.zeros((len(matches), 2), dtype=np.float32)
         matches_comparison = np.zeros((len(matches), 2), dtype=np.float32)
 

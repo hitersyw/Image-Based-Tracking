@@ -21,7 +21,7 @@ plt.ion()
 fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(20, 5))
 plt.axis('off')
 
-segmentation = True
+segmentation = False
 tracker = Tracker.Tracker(segmentation)
 plotter = Plotter.Plotter()
 
@@ -44,7 +44,7 @@ while vc.isOpened():
     red = (0, 0, 255)
     blue = (255, 0, 0)
     green = (0, 255, 0)
-    plot = plotter.plot_matches(frameReference, keypoints1, frameNew, keypoints2, matches, red, blue, mask, green)
+    plot = plotter.plot_matches(frameReference, keypoints1, frameNew, keypoints2, matches, green, blue, mask, red)
     plt.imshow(plot[:,:,::-1])
     plt.draw()
     plt.pause(0.001)

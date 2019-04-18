@@ -6,42 +6,29 @@ class Plotter:
     Helper class to prepare plots of keypoints and matches.
     """
 
-    def plot_segmentation_results(self, image, labeled_image, color_contour, color_mask):
+    def plot_segmentation_results(self, image, labeled_image, color_contour, thickness):
         """!
-        Visualizes the segmentation result by drawing the contour of the instruments on the image,
-        as well as the outline of the geretaed mask of points to exclude from the feature search.
+        Visualizes the segmentation result by drawing the contour of the instruments on the image.
 
         @param image The original image, will be used to display the contours and masks.
         @param labeled_image The resulting image after the segmentation.
-        @param color_contours Color Triple (blue, green, red) with values from 0 to 255. The conoturs will be drawn in this color.
-        @param color_mask Color Triple (blue, green, red) with values from 0 to 255. The masks will be drawn in this color.
-        @return The orignal image with the conoturs and the masks drawn onto.
+        @param color_contours Color Triple (blue, green, red) with values from 0 to 255. The contours will be drawn in this color.
+        @param thickness The thickness of the contours.
+        @return The orignal image with the conoturs drawn onto.
         """
 
         if (not isinstance(color_contour, tuple)) or (len(color_contour) != 3) or (not all(isinstance(x, int) for x in color_contour)) or (not all(x >= 0 and x <= 255 for x in color_contour)):
             raise ValueError('Color_contour needs to be of format (b, g, r) with integer values from 0 to 255.')
 
-        if (not isinstance(color_mask, tuple)) or (len(color_mask) != 3) or (not all(isinstance(x, int) for x in color_mask)) or (not all(x >= 0 and x <= 255 for x in color_mask)):
-            raise ValueError('Color_contour needs to be of format (b, g, r) with integer values from 0 to 255.')
-
-
-        edges = cv2.Canny(labeled_image, 10, 100)
-        kernel = np.ones((7,7),np.uint8)
-        edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
+        label = cv2.cvtColor(labeled_image, cv2.COLOR_BGR2GRAY)
 
         # depending on your OpenCV version this function call differs
         if cv2.__version__.startswith('4'):
-            contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+            contours, _ = cv2.findContours(label, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         else:
-            _, contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-        bounding_boxes = []
+            _, contours, _ = cv2.findContours(label, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         for i in range(len(contours)):
-            box = cv2.minAreaRect(contours[i])
-            bounding_boxes.append(box)
-            vertices = cv2.boxPoints(box)
-            vertices = np.int0(vertices)
-            cv2.drawContours(image, contours[i], -1, color_contour)
-            cv2.drawContours(image, [vertices], 0, color_mask, 2)
+            cv2.drawContours(image, contours[i], -1, color_contour, thickness=thickness)
 
         return image
 
