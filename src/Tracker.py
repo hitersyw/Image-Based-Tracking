@@ -43,7 +43,17 @@ class Tracker:
         """
         # detect lighting dependent artifacts
         image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        mask = cv2.inRange(image_hsv, (0, 0, 180), (255, 255, 255))
+
+        height, width, _ = image_hsv.shape
+        mask = np.zeros((height, width), np.uint8)
+
+        highest_intensity = np.amax(image_hsv[2])
+        lowest_saturation = np.amax(image_hsv[1])
+
+        upper_intensity_thresh = 0.6 * highest_intensity
+        lower_saturation_thresh = 0.4 * lowest_saturation
+
+        mask[np.where(image_hsv[:, :, 2] > upper_intensity_thresh) and np.where(image_hsv[:, :, 1] < lower_saturation_thresh)] = 255
 
         if self.__segmentation:
             label = self.semantic_segmentation(image)
@@ -85,7 +95,7 @@ class Tracker:
         @return keypoints_comparison_image A list of the extracted keypoints in the comparison image of OpenCV type <a href="https://docs.opencv.org/4.0.1/d2/d29/classcv_1_1KeyPoint.html">KeyPoint</a>
         @return matches A list of the found matches of OpenCV type <a href="https://docs.opencv.org/4.0.1/d4/de0/classcv_1_1DMatch.html">DMatch</a>
         """
-        orb = cv2.ORB_create()
+        orb = cv2.ORB_create(2000)
         mask_reference = self.preprocess(reference_image)
         mask_comparison = self.preprocess(comparison_image)
 
