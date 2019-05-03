@@ -1,11 +1,8 @@
 import cv2
 import numpy as np
 import warnings
-
+from skimage import measure
 from .Segmentation import Predictor
-import sys
-np.set_printoptions(threshold=sys.maxsize)
-
 
 class Tracker:
     """!
@@ -128,7 +125,7 @@ class Tracker:
         @param matches The found matches between the two keypoint sets. Must be of OpenCV type <a href="https://docs.opencv.org/4.0.1/d4/de0/classcv_1_1DMatch.html">DMatch</a>. May not be empty.
 
         @return model The computed affine transformation from the first image to the second image.
-        @return mask Binary mask where 1 indicates an inlier to the found model.
+        @return mask Binary mask where True indicates an inlier to the found model.
         """
         if not keypoints_reference_image:
             raise ValueError('keypoints_reference_image may not be empyt.')
@@ -145,7 +142,8 @@ class Tracker:
         for i, match in enumerate(matches):
           matches_reference[i, :] = keypoints_reference_image[match.queryIdx].pt
           matches_comparison[i, :] = keypoints_comparison_image[match.trainIdx].pt
-        model, mask	= cv2.estimateAffine2D(matches_reference, matches_comparison, None, method=cv2.RANSAC, ransacReprojThreshold = 10)
+
+        model, mask = measure.ransac((matches_reference, matches_comparison), tf.AffineTransform, min_samples=8, residual_threshold=10, max_trials=6000)
         return (model, mask)
 
     def track(self, reference_image, comparison_image):
