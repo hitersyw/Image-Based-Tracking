@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import warnings
 from skimage import measure
+from skimage import transform as tf
 from .Segmentation import Predictor
 
 class Tracker:
@@ -143,8 +144,8 @@ class Tracker:
           matches_reference[i, :] = keypoints_reference_image[match.queryIdx].pt
           matches_comparison[i, :] = keypoints_comparison_image[match.trainIdx].pt
 
-        model, mask = measure.ransac((matches_reference, matches_comparison), tf.AffineTransform, min_samples=8, residual_threshold=10, max_trials=6000)
-        return (model, mask)
+        model, mask = measure.ransac((matches_reference, matches_comparison), tf.AffineTransform, min_samples=6,residual_threshold=10, max_trials=6000)
+        return model.params, mask
 
     def track(self, reference_image, comparison_image):
         """!
