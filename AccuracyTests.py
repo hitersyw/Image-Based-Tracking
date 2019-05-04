@@ -27,10 +27,6 @@ segmentation = False
 # instantiate the Plotter
 plotter = Plotter.Plotter()
 
-number_keypoints_reference = []
-number_keypoints_comparison = []
-number_matches = []
-match_rates = []
 models = []
 # inlier rate
 inlier_rates = []
@@ -41,12 +37,7 @@ for _ in range(n):
     tracker = Tracker.Tracker(segmentation)
     k1, k2, m = tracker.extract_and_match(reference_image, comparison_image)
     model, mask = tracker.compute_affine_transform(k1, k2, m)
-
-    number_keypoints_reference.append(len(k1))
-    number_keypoints_comparison.append(len(k2))
-    number_matches.append(len(m))
-    m_rate = (len(m)/len(k1)) if (len(k1) <= len(k2)) else (len(m)/len(k2))
-    match_rates.append(m_rate)
+    
     models.append(model.tolist())
 
     num_inliers = np.count_nonzero(mask)
@@ -54,10 +45,10 @@ for _ in range(n):
 
 
 data = {}
-data['number_keypoints_reference'] = number_keypoints_reference
-data['number_keypoints_comparison'] = number_keypoints_comparison
-data['number_matches'] = number_matches
-data['match_rates'] = match_rates
+data['number_keypoints_reference'] = len(k1)
+data['number_keypoints_comparison'] = len(k2)
+data['number_matches'] = len(m)
+data['match_rate'] = (len(m)/len(k1)) if (len(k1) <= len(k2)) else (len(m)/len(k2))
 data['models'] = models
 data['inlier_rates'] = inlier_rates
 
