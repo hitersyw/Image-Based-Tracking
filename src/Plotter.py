@@ -113,3 +113,52 @@ class Plotter:
                 outliers[i] = 0
         out = cv2.drawMatches(image1, keypoints1, image2, keypoints2, matches, None, color_matches, color_keypoints, inliers)
         return cv2.drawMatches(image1, keypoints1, image2, keypoints2, matches, out, color_outliers, color_keypoints, outliers, 1)
+
+
+    def plot_matches_one_image(self, image, keypoints1, keypoints2, matches, mask, color_keypoints, color_inliers, color_outliers=None):
+        """!
+        Draws the given keypoints and matches onto one image.
+
+        @param image The image to draw onto
+        @param keypoints1 The keypoints of the first image
+        @param keypoints2 The keypoints of the second image.
+        @param matches The matches to plot
+        @param mask  Mask determining which matches are drawn. Has to be of same size as matches.
+        @param color_keypoints Color Triple (blue, green, red) with values from 0 to 255. Keypoints will be drawn in this color.
+        @param color_inliers Color Triple (blue, green, red) with values from 0 to 255. Inliers will be drawn in this color.
+        @param color_outliers optional paramter Color Triple (blue, green, red) with values from 0 to 255. Outliers will be drawn in this color if set. Otherwise the outliers are not plotted.
+
+        @return image_with_matches: returns the image with keypoints and matches drawn according to parameters
+        """
+        if image is None:
+            raise ValueError('Image is not a valid image.')
+
+        if (not isinstance(color_inliers, tuple)) or (len(color_inliers) != 3) or (not all(isinstance(x, int) for x in color_inliers)) or (not all(x >= 0 and x <= 255 for x in color_inliers)):
+            raise ValueError('Color_matches needs to be of format (b, g, r) with integer values from 0 to 255.')
+
+        if color_outliers is not None:
+            if  (not isinstance(color_outliers, tuple)) or (len(color_outliers) != 3) or (not all(isinstance(x, int) for x in color_outliers)) or (not all(x >= 0 and x <= 255 for x in color_outliers)):
+                raise ValueError('Color_matches needs to be of format (b, g, r) with integer values from 0 to 255.')
+
+        if (not isinstance(color_keypoints, tuple)) or (len(color_keypoints) != 3) or (not all(isinstance(x, int) for x in color_keypoints)) or (not all(x >= 0 and x <= 255 for x in color_keypoints)):
+            raise ValueError('Color_keypoints needs to be of format (b, g, r) with integer values from 0 to 255.')
+
+        if mask is None:
+            raise ValueError('Mask may not be None')
+
+        for i in range(len(matches)):
+            m = matches[i]
+            (x1, y1) = keypoints1[m.queryIdx].pt
+            x1 = int(x1)
+            y1 = int(y1)
+            (x2, y2) = keypoints2[m.trainIdx].pt
+            x2 = int(x2)
+            y2 = int(y2)
+            cv2.circle(image, (x2, y2), 5, color_keypoints)
+            if mask[i]:
+                cv2.line(image, (x1, y1), (x2, y2), color_inliers)
+            else:
+                if color_outliers is not None:
+                    cv2.line(image, (x1, y1), (x2, y2), color_outliers)
+
+        return image

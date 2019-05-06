@@ -48,8 +48,8 @@ class Tracker:
         highest_intensity = np.amax(image_hsv[2])
         lowest_saturation = np.amax(image_hsv[1])
 
-        upper_intensity_thresh = 0.6 * highest_intensity
-        lower_saturation_thresh = 0.4 * lowest_saturation
+        upper_intensity_thresh = 0.8 * highest_intensity
+        lower_saturation_thresh = 0.2 * lowest_saturation
 
         mask[np.where(image_hsv[:, :, 2] > upper_intensity_thresh) and np.where(image_hsv[:, :, 1] < lower_saturation_thresh)] = 255
 
