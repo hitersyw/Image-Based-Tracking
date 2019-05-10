@@ -9,11 +9,11 @@ import numpy as np
 import datetime
 
 
-vc = cv2.VideoCapture('data/Geschnittene_Videos/Instrumente/Paprika_innen_Instrumente.mp4')
+vc = cv2.VideoCapture('data/CI522 insertion strekin.mpg')
 frame_width = int(vc.get(3))
 frame_height = int(vc.get(4))
 fps = int(vc.get(5))
-vw = cv2.VideoWriter('data/Geschnittene_Videos/Instrumente/Keypoints/Paprika_innen_Instrumente_Keypoints.mp4', cv2.VideoWriter_fourcc('M','J','P','G'), fps, (frame_width,frame_height))
+vw = cv2.VideoWriter('data/CI522TestMatches.mp4', cv2.VideoWriter_fourcc('M','J','P','G'), fps, (frame_width,frame_height))
 
 _, frameReference = vc.read()
 
@@ -23,13 +23,12 @@ fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(20, 5))
 plt.axis('off')"""
 
 i  = 0
-segmentation = True
+segmentation = False
 orb = Tracker.Tracker(segmentation)
 plotter = Plotter.Plotter()
 start = datetime.datetime.now()
 while vc.isOpened():
-    time1 = datetime.datetime.now()
-    print('frame read')
+    #time1 = datetime.datetime.now()
     _, frameNew = vc.read()
 
     i += 1
@@ -40,35 +39,42 @@ while vc.isOpened():
         print('done, writing video...')
         break
 
-    label = orb.semantic_segmentation(frameReference)
-    print('label computed')
+    #label = orb.semantic_segmentation(frameReference)
+    #print('label computed')
     k1, k2, m = orb.extract_and_match(frameReference, frameNew)
-    print('keypoints found')
-    time2 = datetime.datetime.now()
 
 
-    seg = plotter.plot_segmentation_results(frameReference, label, (0, 0, 255), (0, 0, 255))
+    """seg = plotter.plot_segmentation_results(frameReference, label, (0, 0, 255), (0, 0, 255))
     print('seg plot done')
     if k1 and k2 and m:
         kp = plotter.plot_keypoints(seg, k1, 4, (255, 0, 0))
         vw.write(kp)
     else:
-        vw.write(seg)
-    """if k1 and k2 and m:
+        vw.write(seg)"""
+    if k1 and k2 and m:
+        time1 = datetime.datetime.now()
+
         _, mask = orb.compute_affine_transform(k1, k2, m)
-        inlier = (0, 255, 0) #gruen
-        outlier = (0, 0, 255) #red
-        keypointsColor = (255, 0, 0) #blue
-        matches = plotter.plot_matches(frameReference, k1, frameNew, k2, m, inlier, keypointsColor, mask, color_outliers=outlier)
+        time2 = datetime.datetime.now()
+
+
+        blue = (255, 0, 0)
+        red = (0, 0, 255)
+        green = (0, 225, 0)
+        black = (0, 0, 0)
+        radius = 5
+        matches = plotter.plot_matches_one_image(frameNew, k1, k2, m, mask, black, green)
         vw.write(matches)
     else:
-        vw.write(frameReference)
-    """
+        time1 = datetime.datetime.now()
+        vw.write(frameNew)
+
     print("--- Frame ", count, " to frame ", count + 1);
     print("time to process image: ", time2 - time1)
+
     #print(matrix)
 
-    frameReference = frameNew
+    #frameReference = frameNew
     count += 1
 
     if cv2.waitKey(1) & 0xFF == ord('q'):

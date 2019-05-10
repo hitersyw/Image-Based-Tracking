@@ -1,15 +1,16 @@
 import cv2
 import numpy as np
-import warnings
 from skimage import measure
 from skimage import transform as tf
+import warnings
+
 from .Segmentation import Predictor
 
 class Tracker:
     """!
     This class can be used to track a scene by providing two images of the scene.
     It uses the OpenCV implementation of ORB (Oriented FAST and Rotated BRIEF) for keypoint and descriptor extraction
-    and the OpenCV implementation of RANSAC (Random Sample Consensus) for computing the transformation.
+    and the scikit-image implementation of RANSAC (Random Sample Consensus) for computing the transformation.
     """
 
     def __init__(self, segmentation):
@@ -18,7 +19,7 @@ class Tracker:
         Currently only segmentation for surgical instruments is supported.
         If you have a different model trained you have to change the parameters in the Predictor.predict() call.
         We use Googles DeepLabV3+ as model.
-        If you want to change the net see @link Predictor @endlink for further information.
+        If you want to change the trained network see @link Predictor @endlink for further information.
 
         @param segmentation True, if the tracker should consider labels from semantic segmentations during the tracking process.
         """
@@ -34,11 +35,13 @@ class Tracker:
     def preprocess(self, image):
         """!
         Preprocesses the given image and returns a mask with lighting dependent artifacts marked. If the class is called with segmentation=True
-        all found surgical instruments are marked as well. In this case the input image needs to be a color image.
+        all found surgical instruments are marked as well. The input image needs to be a color image.
 
         @param image The image to preprocess.
         @return The black and white mask for the given image.
         """
+        if image is None:
+            raise ValueError("The image may not be None.")
         # detect lighting dependent artifacts
         image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
@@ -69,10 +72,12 @@ class Tracker:
         Currently only segmentation for surgical instruments is supported.
         If you have a different model trained you have to change the parameters in the Predictor.predict() call.
         We use Googles DeepLabV3+ as model.
-        If you want to change the net see @link Predictor @endlink for further information.
+        If you want to change the trained network see @link Predictor @endlink for further information.
 
         @param image The image to segment. Must be a color image.
         """
+        if image is None:
+            raise ValueError("The image may not be None.")
         # ensure the neural net is initialized
         if not self.__pred:
             self.__pred = Predictor.Predictor('DeepLabV3_plus', './src/Segmentation/trained_net/latest_model_DeepLabV3_plus_Surgery.ckpt')
@@ -93,6 +98,12 @@ class Tracker:
         @return keypoints_comparison_image A list of the extracted keypoints in the comparison image of OpenCV type <a href="https://docs.opencv.org/4.0.1/d2/d29/classcv_1_1KeyPoint.html">KeyPoint</a>
         @return matches A list of the found matches of OpenCV type <a href="https://docs.opencv.org/4.0.1/d4/de0/classcv_1_1DMatch.html">DMatch</a>
         """
+        if reference_image is None:
+            raise ValueError('reference_image is not a valid image.')
+
+        if comparison_image is None:
+            raise ValueError('comparison_image is not a valid image.')
+
         orb = cv2.ORB_create(2000)
         mask_reference = self.preprocess(reference_image)
         mask_comparison = self.preprocess(comparison_image)
@@ -125,7 +136,7 @@ class Tracker:
         @param keypoints_comparison_image The keypoints found in the second image. Must be of OpenCV type <a href="https://docs.opencv.org/4.0.1/d2/d29/classcv_1_1KeyPoint.html">KeyPoint</a>. May not be empty.
         @param matches The found matches between the two keypoint sets. Must be of OpenCV type <a href="https://docs.opencv.org/4.0.1/d4/de0/classcv_1_1DMatch.html">DMatch</a>. May not be empty.
 
-        @return model The computed affine transformation from the first image to the second image.
+        @return model The computed affine transformation matrix.
         @return mask Binary mask where True indicates an inlier to the found model.
         """
         if not keypoints_reference_image:
@@ -144,7 +155,7 @@ class Tracker:
           matches_reference[i, :] = keypoints_reference_image[match.queryIdx].pt
           matches_comparison[i, :] = keypoints_comparison_image[match.trainIdx].pt
 
-        model, mask = measure.ransac((matches_reference, matches_comparison), tf.AffineTransform, min_samples=6,residual_threshold=10, max_trials=6000)
+        model, mask = measure.ransac((matches_reference, matches_comparison), tf.AffineTransform, min_samples=3,residual_threshold=10, max_trials=600)
         return model.params, mask
 
     def track(self, reference_image, comparison_image):
@@ -158,5 +169,11 @@ class Tracker:
         @return model The computed affine transformation from the first image to the second image.
         @return mask Binary mask where 1 indicates an inlier to the found model.
         """
+        if reference_image is None:
+            raise ValueError('reference_image is not a valid image.')
+
+        if comparison_image is None:
+            raise ValueError('comparison_image is not a valid image.')
+
         k1, k2, m = self.extract_and_match(reference_image, comparison_image)
         return self.compute_affine_transform(k1, k2, m)

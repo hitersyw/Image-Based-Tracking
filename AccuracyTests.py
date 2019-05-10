@@ -8,23 +8,29 @@ import matplotlib.pyplot as plt
 import numpy as np
 import datetime
 from skimage import transform as tf
+from skimage import io
 import json
 
 #reference_image = cv2.imread('./data/OP2.png')
-img = cv2.imread('./data/OP2.png')
+img = cv2.imread('./data/Test1.jpg')
 height, width, _ = img.shape
 #comparison_image =  cv2.imread('./data/OP2.png')
-
-end = width - 500
-reference_image = img[:end, :]
-comparison_image = img[500:width, :]
-cv2.imwrite('ref.png', reference_image)
-
-cv2.imwrite('comp.png', comparison_image)
+#
+#reference_image = img[ 0:(height-70), 0:(width-100)]
+#comparison_image = img[70:height, 100:width]
+comparison_image = cv2.imread('data/Test2.jpg')
+#ref = img[0:height, 0:height]
+ref = img
+image_center = tuple(np.array(ref.shape[1::-1]) / 2)
+rot_mat = cv2.getRotationMatrix2D(image_center, 90, 1.0)
+comp = cv2.warpAffine(ref, rot_mat, ref.shape[1::-1], flags=cv2.INTER_LINEAR)
+#cv2.imwrite('ref.png', ref)
+cv2.imwrite('comp.png', comp)
+#test = tf.rotate(ref, 90)
+#io.imsave('testtest.png', test)
 
 segmentation = False
-# instantiate the Tracker with the two images
-# instantiate the Plotter
+
 plotter = Plotter.Plotter()
 
 models = []
@@ -33,11 +39,12 @@ inlier_rates = []
 
 #perform tests n=X times -> add keypoints, matches and models to a list for each
 n = 10
-for _ in range(n):
+for i in range(n):
+    print('Round ', i)
     tracker = Tracker.Tracker(segmentation)
-    k1, k2, m = tracker.extract_and_match(reference_image, comparison_image)
+    k1, k2, m = tracker.extract_and_match(img, comparison_image)
     model, mask = tracker.compute_affine_transform(k1, k2, m)
-    
+    print(model)
     models.append(model.tolist())
 
     num_inliers = np.count_nonzero(mask)

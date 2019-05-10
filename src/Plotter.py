@@ -34,11 +34,11 @@ class Plotter:
 
     def plot_keypoints(self, image, keypoints, radius, color):
         """!
-        Draws the given keypoints onto the given image in the given color.
+        Draws the given keypoints as circles onto the given image in the given color.
 
         @param image: The image to draw the keypoints on.
         @param keypoints: The keypoints to draw.
-        @param radius: The radius of the keypoints.
+        @param radius: The radius of the circle around the keypoint.
         @param color: Color Triple (blue, green, red) with values from 0 to 255. The keypoints will be drawn in this color.
 
         @return image_with_keypoints: returns the given image with the keypoints drawn on it
@@ -61,7 +61,7 @@ class Plotter:
 
     def plot_matches(self, image1, keypoints1, image2, keypoints2, matches, color_matches, color_keypoints, mask=None, color_outliers=None):
         """!
-        Draws the given keypoints and matches onto the given images.
+        Draws the given keypoints and matches onto the given images. The resulting image is of width image1.width + image2.width
         An optional mask determines what keypoints to draw and if color_outliers is set additionaly the mask will be treated as inliers and outliers and will be drawn in different colors.
 
         @param image1 The first image
