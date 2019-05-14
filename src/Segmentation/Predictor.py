@@ -9,9 +9,11 @@ from .builders import model_builder
 
 class Predictor:
     """!
-    Class used to query the trained neural net. Currently only segmentation of surgical instruments is supported.
+    Class used to query the trained neural network. Currently only segmentation of surgical instruments is supported.
     This class relies on the <a href="https://github.com/GeorgeSeif/Semantic-Segmentation-Suite">Semantic Segmentation Suite by George Seif</a>.
+
     If you want to feed in your own trained net, see his GitHub page for information on how to train the net.
+    In this case make sure to provide the label info file 'class_dict.csv' in '/src/Segmentation/utils/'.
     """
 
     def __init__(self, model, checkpoint_path):
@@ -47,7 +49,7 @@ class Predictor:
 
     def predict(self, image):
         """!
-        Queries the net using the given image as input.
+        Queries the network loaded in init using the given image as input.
 
         @param image The image to query
 

@@ -126,7 +126,7 @@ class Plotter:
         @param mask  Mask determining which matches are drawn. Has to be of same size as matches.
         @param color_keypoints Color Triple (blue, green, red) with values from 0 to 255. Keypoints will be drawn in this color.
         @param color_inliers Color Triple (blue, green, red) with values from 0 to 255. Inliers will be drawn in this color.
-        @param color_outliers optional paramter Color Triple (blue, green, red) with values from 0 to 255. Outliers will be drawn in this color if set. Otherwise the outliers are not plotted.
+        @param color_outliers optional paramter. Color Triple (blue, green, red) with values from 0 to 255. Outliers will be drawn in this color if set. Otherwise the outliers are not plotted.
 
         @return image_with_matches: returns the image with keypoints and matches drawn according to parameters
         """

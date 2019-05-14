@@ -20,6 +20,7 @@ class Tracker:
         If you have a different model trained you have to change the parameters in the Predictor.predict() call.
         We use Googles DeepLabV3+ as model.
         If you want to change the trained network see @link Predictor @endlink for further information.
+        Make sure the path to the trained network is then set correctly in this method.
 
         @param segmentation True, if the tracker should consider labels from semantic segmentations during the tracking process.
         """
@@ -34,8 +35,8 @@ class Tracker:
 
     def preprocess(self, image):
         """!
-        Preprocesses the given image and returns a mask with lighting dependent artifacts marked. If the class is called with segmentation=True
-        all found surgical instruments are marked as well. The input image needs to be a color image.
+        Preprocesses the given image and returns a mask with lighting dependent artifacts marked. If the Tracker object is initialized with segmentation=True
+        all detected surgical instruments are marked as well. The input image needs to be a color image.
 
         @param image The image to preprocess.
         @return The black and white mask for the given image.
@@ -73,6 +74,8 @@ class Tracker:
         If you have a different model trained you have to change the parameters in the Predictor.predict() call.
         We use Googles DeepLabV3+ as model.
         If you want to change the trained network see @link Predictor @endlink for further information.
+        Make sure the path to the trained network is then set correctly in this method and the init method.
+
 
         @param image The image to segment. Must be a color image.
         """
@@ -103,6 +106,9 @@ class Tracker:
 
         if comparison_image is None:
             raise ValueError('comparison_image is not a valid image.')
+
+        if reference_image.shape != comparison_image.shape:
+            raise ValueError('Both images need to be of same size.')
 
         orb = cv2.ORB_create(2000)
         mask_reference = self.preprocess(reference_image)
@@ -174,6 +180,9 @@ class Tracker:
 
         if comparison_image is None:
             raise ValueError('comparison_image is not a valid image.')
+
+        if reference_image.shape != comparison_image.shape:
+            raise ValueError('Both images need to be of same size.')
 
         k1, k2, m = self.extract_and_match(reference_image, comparison_image)
         return self.compute_affine_transform(k1, k2, m)

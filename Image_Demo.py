@@ -22,8 +22,8 @@ print(reference_image.shape)
 M = np.float32([[1, 0, 40], [0, 1, 50]])
 comparison_image = cv2.warpAffine(reference_image, M, (width, height))
 
-segmentation = True
-# instantiate the Tracker with the two images
+segmentation = False
+# instantiate the Tracker with the segmentation option
 tracker = Tracker.Tracker(segmentation)
 # instantiate the Plotter
 plotter = Plotter.Plotter()
@@ -59,6 +59,7 @@ figure2 = plt.figure(figsize=(12, 8))
 plt.title("Matches")
 plt.axis('off')
 print("Plotting matches...")
+# plot the matches in their images
 matches_image = plotter.plot_matches(reference_image, keypoints_ref, comparison_image, keypoints_comp, matches, blue, red)
 plt.imshow(matches_image[:,:,::-1])
 plt.show()

@@ -12,8 +12,9 @@ import datetime
 from src import Tracker
 from src import Plotter
 
+# prepare the video input stream
 vc = cv2.VideoCapture('./data/Surgery.avi')
-
+# read the first frame of the video stream
 _, frameReference = vc.read()
 
 count = 0
@@ -22,12 +23,14 @@ fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(20, 5))
 plt.axis('off')
 
 segmentation = False
+# instantiate the Tracker with the segmentation option
 tracker = Tracker.Tracker(segmentation)
 plotter = Plotter.Plotter()
 
 start = datetime.datetime.now()
 while vc.isOpened():
     time1 = datetime.datetime.now()
+    # grab the next frame
     _, frameNew = vc.read()
 
     if frameNew is None:
@@ -37,13 +40,16 @@ while vc.isOpened():
 
     assert frameReference.shape == frameNew.shape
 
-
+    # extract the keypoints and match them according to their descriptors
     keypoints1, keypoints2, matches = tracker.extract_and_match(frameReference, frameNew)
+    # compute the affine transformation model and get the inlier mask
     model, mask = tracker.compute_affine_transform(keypoints1, keypoints2, matches)
 
     red = (0, 0, 255)
     blue = (255, 0, 0)
     green = (0, 255, 0)
+
+    # plot the matches in their images. All inliers will be drawn in green, the outliers in red
     plot = plotter.plot_matches(frameReference, keypoints1, frameNew, keypoints2, matches, green, blue, mask, red)
     plt.imshow(plot[:,:,::-1])
     plt.draw()
