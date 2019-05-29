@@ -5,7 +5,7 @@ from skimage import transform as tf
 import warnings
 
 from .Segmentation import Predictor
-
+import datetime
 class Tracker:
     """!
     This class can be used to track a scene by providing two images of the scene.
@@ -65,6 +65,7 @@ class Tracker:
 
         kernel = np.ones((5, 5))
         mask = cv2.dilate(mask, kernel)
+
         return cv2.bitwise_not(mask)
 
     def semantic_segmentation(self, image):
@@ -111,8 +112,9 @@ class Tracker:
             raise ValueError('Both images need to be of same size.')
 
         orb = cv2.ORB_create(2000)
-        mask_reference = self.preprocess(reference_image)
+
         mask_comparison = self.preprocess(comparison_image)
+        mask_reference = self.preprocess(reference_image)
 
         keypoints1, descriptors1 = orb.detectAndCompute(reference_image, mask_reference)
         keypoints2, descriptors2 = orb.detectAndCompute(comparison_image, mask_comparison)
@@ -186,3 +188,42 @@ class Tracker:
 
         k1, k2, m = self.extract_and_match(reference_image, comparison_image)
         return self.compute_affine_transform(k1, k2, m)
+
+
+
+    def track_video_stream(self, video_path):
+        """!
+        Method to track subsequent images by providing the path to an image stream.
+        Note: this method was not tested heavily yet and might result in wrongly detected movements.
+
+        @param video_path The path to the video stream to track.
+        @return The accumulated estimated transformation between the initial image and the final image of the image stream.
+        """
+        if not video_path:
+            raise ValueError('Not a valid video path.')
+        vc = cv2.VideoCapture(video_path)
+        _, ref_image = vc.read()
+        _, prev_image = vc.read()
+        accumulated_trans = np.eye(3, dtype=int)
+
+        while vc.isOpened():
+            _, new_image = vc.read()
+            if new_image is None:
+                break
+            kp_ref, kp_new, matches = self.extract_and_match(ref_image, new_image)
+            match_rate = len(matches)/len(kp_new)
+            print(match_rate)
+            if match_rate >= 0.3:
+                trans, _ = self.compute_affine_transform(kp_ref, kp_new, matches)
+                prev_image = new_image
+            else:
+                kp_prev, kp_new, matches = self.extract_and_match(prev_image, new_image)
+                trans, _ = self.compute_affine_transform(kp_prev, kp_new, matches)
+                kp_ref, kp_prev, matches = self.extract_and_match(ref_image, prev_image)
+                trans_ref_to_prev = self.compute_affine_transform(kp_ref, kp_prev, matches)
+                accumulated_trans = np.matmul(trans_ref_to_prev, accumulated_trans)
+                ref_image = prev_image
+            print('acctrans:', accumulated_trans)
+            print('trans', trans)
+
+        return np.matmul(trans, accumulated_trans)
