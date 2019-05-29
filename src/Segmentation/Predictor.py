@@ -60,14 +60,7 @@ class Predictor:
         loaded_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         resized_image = cv2.resize(loaded_image, (width, height))
         input_image = np.expand_dims(np.float32(resized_image[:height, :width]),axis=0)/255.0
-
-        time1 = datetime.datetime.now()
-
         output_image = self.sess.run(self.network,feed_dict={self.net_input:input_image})
-
-        time2 = datetime.datetime.now()
-        print("time for query: ", time2 - time1)
-
         output_image = np.array(output_image[0,:,:,:])
         output_image = helpers.reverse_one_hot(output_image)
 
